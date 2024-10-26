@@ -1,0 +1,2 @@
+# Wazuh-Training
+Kebutuhan Training
