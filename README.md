@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/2f286530-1524-4b38-8cc1-433147bf0da2)# Wazuh-Training
+# Wazuh-Training
 Kebutuhan Training, Training Wazuh IDN.ID Wazuh for Security engineer
 
 PowerPoint : https://docs.google.com/presentation/d/1i-xjPOyj7c3rQ2GHbR5OmfP5szXyilX-Ygms_XYCSGI/edit?usp=sharing
