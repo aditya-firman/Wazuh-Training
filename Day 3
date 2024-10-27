@@ -1,2 +1,163 @@
 Selamat Datang !
 
+==============================================================================================
+Lab 1 - Set Up Comprehensive File Integrity Monitoring (FIM) on a Wazuh Agent
+==============================================================================================
+
+1. edit ossec.conf ( agent ubuntu ) tambahkan configurasi dibawah ini : 
+
+<syscheck>
+    <!-- Monitor critical system directories -->
+    <directories realtime="yes" whodata="yes" report_changes="yes">/etc</directories>
+    <directories realtime="yes" whodata="yes" report_changes="yes">/var/www/html</directories>
+
+    <!-- Exclude log and temp files from monitoring -->
+    <ignore>/var/log/*</ignore>
+    <ignore>/tmp/*</ignore>
+</syscheck>
+
+2. selesai
+
+
+==============================================================================================
+==============================================================================================
+
+==============================================================================================
+Lab 2 - Agent Inventory Collection and Vulnerability Detection
+==============================================================================================
+
+1. edit ossec.conf ( agent ubuntu ) tambahkan configurasi dibawah ini : 
+
+  <vulnerability-detector>
+    <enabled>yes</enabled>
+    <interval>6h</interval>  <!-- Scan every 6 hours -->
+    <feed>nvd</feed>          <!-- Use NVD CVE feed -->
+    <feed>ubuntu</feed>       <!-- Ubuntu CVE feed (if on Ubuntu) -->
+    <alerts>yes</alerts>       <!-- Enable alerts for vulnerabilities -->
+  </vulnerability-detector>
+
+
+2. Instal applikasi dengan versi lama 
+   - sudo apt install openssl=1.1.1f-1ubuntu2 -y
+
+3. verifikasi 
+   - tail -f /var/ossec/logs/alerts/alerts.json
+
+
+==============================================================================================
+==============================================================================================
+
+
+==============================================================================================
+Lab 3 - FIM Detecting Malware
+==============================================================================================
+
+1. edit ossec.conf ( agent ubuntu ) tambahkan configurasi dibawah ini : 
+
+<rootcheck>
+  <enabled>yes</enabled>
+  <rootkit_files>yes</rootkit_files> <!-- Scan for rootkit IoCs -->
+  <rootkit_trojans>yes</rootkit_trojans> <!-- Detect known trojans →
+    <check_rk>yes</check_rk> <!-- Enable kernel check →
+  <frequency>3600</frequency> <!-- Scan every hour -->
+</rootcheck>
+
+<syscheck>
+  <directories check_all="yes">/bin</directories>
+  <directories check_all="yes">/sbin</directories>
+  <directories check_all="yes">/etc</directories>
+  <directories check_all="yes">/usr/bin</directories>
+  <directories check_all="yes">/tmp</directories> <!-- Rootkit hiding place -->
+  <alert_new_files>yes</alert_new_files>
+  <frequency>3600</frequency>
+</syscheck>
+
+2. Buatkan file yang diangap rootkit dengan mode user 
+  - touch /etc/.hidden_malware
+  - sudo mv /bin/ps /bin/ps.bak
+  - echo "#!/bin/bash" | sudo tee /bin/ps > /dev/null
+  - sudo chmod +x /bin/ps
+
+3. Verifikasi 
+  - tail -f /var/ossec/logs/alerts/alerts.json
+
+4. Lakukan dengan rootkit mode kernel 
+  - sudo apt-get install rkhunter
+  - sudo rkhunter --check --skip-keypress
+
+5. Selesai
+
+==============================================================================================
+==============================================================================================
+
+
+==============================================================================================
+Lab 4 - Automatic Firewall Blocking SSH Brute Force
+==============================================================================================
+
+1. edit ossec.conf ( agent ubuntu ) tambahkan configurasi dibawah ini : 
+
+  <active-response>
+    <command>firewall-drop</command> <!-- Script to block the IP -->
+    <location>local</location>       <!-- Run on local agent -->
+    <rules_id>1002</rules_id>        <!-- Use the SSH brute force rule ID -->
+    <timeout>600</timeout>           <!-- Block the IP for 10 minutes -->
+    <repeated_offenders>no</repeated_offenders> <!-- No repeated offender tracking -->
+  </active-response>
+
+2. Selesai
+
+==============================================================================================
+==============================================================================================
+
+==============================================================================================
+Lab 5 - Custom SCA
+==============================================================================================
+
+1. buatlah file yang menyerupa user & password 
+   - echo -e "config_file\nsecond line of configuration\npassword_enabled: yes" > /usr/share/testfile.txt
+
+2. buatlah directory sca custom 
+  - mkdir /var/ossec/etc/custom-sca-files/
+
+3. buatla SCA Policy dengan nama custom-sca-files 
+   - sudo nano /var/ossec/etc/custom-sca-files/keywordcheck.yml
+
+      policy:
+        id: "keyword_check"
+        file: "keywordcheck.yml"
+        name: "SCA use case: Keyword check"
+        description: "Guidance for checking for a keyword or phrase in files on Ubuntu endpoints."
+        references:
+          - https://documentation.wazuh.com/current/user-manual/capabilities/sec-config-assessment/index.html
+          - https://documentation.wazuh.com/current/user-manual/capabilities/sec-config-assessment/creating-custom-policies.html
+      
+      requirements:
+        title: "Check that the desired file exists on the monitored endpoints"
+        description: "Requirements for running the SCA scans against endpoints with testfile.txt on them."
+        condition: any
+        rules:
+          - 'f:/usr/share/testfile.txt'
+      
+      checks:
+        - id: 10000
+          title: "Ensure password is disabled in the test configuration file"
+          description: "Password is enabled in the test configuration file."
+          rationale: "Password is considered weak for the custom test application. Threat actors can brute-force your password."
+          remediation: "Disable password by setting the value of the password_enabled option to no."
+          condition: none
+          rules:
+            - 'f:/usr/share/testfile.txt -> r:^password_enabled: yes$'
+
+4. ubah ownership dari file diatas
+   - chown wazuh:wazuh /var/ossec/etc/custom-sca-files/keyword.yml
+
+5. tambahkan configurasi di ossec.conf 
+   - <policy enabled="yes">/var/ossec/etc/custom-sca-files/keyword.yml</policy>
+
+6. restart wazuh-agent
+   - systemctl restart wazuh-agent
+
+
+==============================================================================================
+==============================================================================================
