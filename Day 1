@@ -1,5 +1,85 @@
-TEST
+Selamat Datang !
 
+==============================================================================================
+Lab 1 - Deployment and Agent Registration Methods
+==============================================================================================
+
+1. Masuk ke ubuntu-server untuk instaling wazuh menggunakan ssh 
+   ssh <user>@<ip> 
+2. Masukan script dibawah ini 
+   curl -sO https://packages.wazuh.com/4.9/wazuh-install.sh && sudo bash ./wazuh-install.sh -a
+3. Silahkan tunggu untuk selesai instaling, sampai menemukan user & password ( SILAHKAN NOTE USER & PASSWORD DI NOTE SENDIRI )
+4. Akses Dashboard Wazuh https://<ip-wazuh-server> 
+5. Masukan User & Password yang ada setelah instalasi 
+6. Akses Server Management Dashboard 
+   - Arahkan cursor ke kiri atas untuk menu 
+   - Temukan Server Management 
+   - Klik Endpoint Groups
+   - Buat Group dengan nama <HQ-SRV> 
+     - Add New Group 
+     - Isikan HQ-SRV
+     - Done
+7. Masih di Server Management
+    - Klik Endpoint Summary 
+    - Klik Deploy New Agent 
+    - Sesuaikan dengan Operating System yang akan kita instal Agent
+8. Selesai, Lihat endpoint di Dashboard Wazuh
+
+==============================================================================================
+==============================================================================================
+
+==============================================================================================
+Lab 2 - Deployment and Agent Registration Methods
+==============================================================================================
+
+1. Masuk ke menu, dan cari Dashboard menu di Section Explore
+2. Klik Create New Dashboard, Dan Create New Visualization
+3. Cari Menu PIE
+4. Source yang kita pilih wazuh-alerts-*
+5. Metrics yang kita pilih 
+    - Aggregation : Count
+6. Bucket yang kita pilih 
+    - Aggregation : Terms
+    - Field : rule.mitre.id
+    - Order by : Metric:Count
+    - Order : Ascending, Size : 10
+7. Update dibawah Dashboard sebelah kanan
+8. Save Visualisasi di kanan atas
+9. Isikan Title dengan MITRE-ID, save
+10. Selesai 
+
+==============================================================================================
+==============================================================================================
+
+==============================================================================================
+Lab 3 - Introduction Wazuh Wazuh Query Language
+==============================================================================================
+
+1. Silahkan ke Menu Threat Intelligence, Pilih MITRE ATT & CK
+2. Pindahkan Dashboard ke Framework, dan Search Active Directory
+3. Selesai
+ 
+==============================================================================================
+==============================================================================================
+
+==============================================================================================
+Lab 4 - Logging Wazuh API
+==============================================================================================
+
+1. Kita harus tau user & password wazuh API dengan cara : 
+     - tar -axf wazuh-install-files.tar wazuh-install-files/wazuh-passwords.txt -O | grep -P "\'wazuh\'" -A 1
+2. Buat JWT Token untuk akses ke Wazuh API
+     - TOKEN=$(curl -u <WAZUH_API_USER>:<WAZUH_API_PASSWORD> -k -X POST "https://localhost:55000/security/user/authenticate?raw=true")
+     - echo $TOKEN
+     - curl -k -X GET "https://localhost:55000/" -H "Authorization: Bearer $TOKEN"
+3. Selesai
+
+==============================================================================================
+==============================================================================================
+
+==============================================================================================
+Lab 5 - Wazuh Push Upgrade Agent
+==============================================================================================
 
 Python script logging with Wazuh API
 
@@ -48,4 +128,29 @@ response = requests.get(f"{protocol}://{host}:{port}/agents/summary/status?prett
 print(response.text)
 
 print("\nEnd of the script.\n")
+
+==============================================================================================
+==============================================================================================
+
+==============================================================================================
+Lab 6 - Lab Configuring Central
+==============================================================================================
+
+1. Akses ke Wazuh server dan List semua agent
+   - sudo /var/ossec/bin/agent_control -l
+2. kita masuk ke configuration agent.conf
+   - sudo /var/ossec/etc/shared/HQ-SRV/agent.conf
+   - Masukan Configurasi : 
+              <agent_config>
+                  <group name="HQ-SRV">
+                    <syscheck>
+                      <frequency>3600</frequency>
+                      <directories check_all="yes">/PATH/TO/FIM</directories>
+                    </syscheck>
+                  </group>
+            </agent_config>
+3. Cek disemua agent, dengan cara tail -f /var/ossec/logs/ossec.log
+
+==============================================================================================
+==============================================================================================
 
