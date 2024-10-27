@@ -1,2 +1,396 @@
 Selamat Datang !
 
+
+==============================================================================================
+Lab 1 - Log Data & Log Analysis
+==============================================================================================
+
+Practical Example : 
+
+1. Checking Decoder Di Server Manager, Ruleset Test dan lemparkan Log 
+      Apr 01 19:21:24 securityapp: INFO: action="logged on" srcuser="Bob"
+2. Menambahkan Decoder di local_decoder.xml
+     - sudo nano /var/ossec/etc/decoder/local_decoder.xml
+     - Tambahkan Configurasi ini : 
+          <decoder name="securityapp">
+            <program_name>securityapp</program_name>
+            <regex>(\w+): srcuser="(\.+)" action="(\.+)" dstusr="(\.+)"</regex>
+            <order>type,srcuser,action,dstuser</order>
+          </decoder>
+     - systemctl restart wazuh-manager
+3. Testing Kembali Menggunakan Ruleset Test, Hasilnya akan gagal 
+4. Lakukan Yang Siblings Decoder, dengan hapus configurasi diatas dan tambahkan configurasi dibawah ini 
+    
+<decoder name="securityapp">
+  <program_name>securityapp</program_name>
+</decoder>
+
+<decoder name="securityapp">
+  <parent>securityapp</parent>
+  <regex>^(\w+):</regex>
+  <order>type</order>
+</decoder>
+
+<decoder name="securityapp">
+  <parent>securityapp</parent>
+  <regex>srcuser="(\.+)"</regex>
+  <order>srcuser</order>
+</decoder>
+
+
+<decoder name="securityapp">
+  <parent>securityapp</parent>
+  <regex>action="(\.+)"</regex>
+  <order>action</order>
+</decoder>
+
+<decoder name="securityapp">
+  <parent>securityapp</parent>
+  <regex>dstusr="(\.+)"</regex>
+  <order>dstuser</order>
+</decoder>
+
+5. Testing Kembali 
+6. Lakukan Hal Yang sama dengan log ini 
+    Aug 19 12:34:56 pfSense filterlog: 100,,,0,em1,match,block,in,4,0x0,,64,38641,0,DF,6,tcp,60,192.168.1.100,10.0.0.1,56789,22,0,S,4002566012,,64240,,mss;nop;wscale;nop;nop;TS;nop
+7. lakukan Hal yang sama dengan log ini 
+    Oct 19 14:32:01 router1 assigned 192.168.1.100 to AA:BB:CC:DD:EE:FF
+8. Karena Tidak ada decoder kita akan buat decodernya, edit di local_decoder.xml ( /var/ossec/etc/decoder/local_decoder.xml ) 
+    Masukan 
+        <decoder name="mikrotik_dhcp">
+          <prematch>^assigned</prematch>
+        </decoder>
+        
+        <decoder name="mikrotik_router">
+          <parent>mikrotik_dhcp</parent>
+          <regex offset="after_parent">(\d+.\d+.\d+.\d+) to (\w+:\w+:\w+:\w+:\w+:\w+)</regex>
+          <order>srcip,mac</order>
+        </decoder>
+9. Testing Kembali 
+10 Lakukan Hal yang sama dengan log ini 
+     Oct 12 11:47:40 name-mikrotik login failure for user ITw from 172.16.9.93 via winbox
+11. Karena tidak ada decoder, edit file local_decoder.xml dengan decoder dibawah ini : 
+   
+    <decoder name="mikrotik">
+      <prematch>^login</prematch>
+    </decoder>
+    
+    <decoder name="mikrotik_router">
+      <parent>mikrotik</parent>
+      <regex offset="after_parent">^(\.+) for user (\.+) from (\d+.\d+.\d+.\d+) via (\.+)</regex>
+      <order>status,user,srcip,method</order>
+    </decoder>
+
+12. Selesai 
+
+==============================================================================================
+==============================================================================================
+
+
+==============================================================================================
+Lab 2 - Syslog Integration 
+==============================================================================================
+
+1. Configurasi Mikrotik untuk melempar Log pada agent-ubuntu 
+2. pada agent ubuntu lakukan configurasi ini
+   - ossec.conf
+
+   <syslog_output>
+      <server>
+          <address>YOUR_SYSLOG_SERVER_IP</address>   <!-- Syslog server IP or hostname -->
+          <port>514</port>                           <!-- Default Syslog port (UDP 514) -->
+          <protocol>udp</protocol>                   <!-- Syslog protocol: udp, tcp, or tls -->
+          <format>default</format>                   <!-- Syslog format: default or cef (Common Event Format) -->
+          <queue_size>5000</queue_size>              <!-- Maximum number of messages in the queue -->
+          <frequency>10</frequency>                  <!-- Frequency of sending log data in seconds -->
+      </server>
+  </syslog_output>
+
+3. Edit /etc/rsyslog.conf
+
+      if udp 
+      $ModLoad imudp
+      $UDPServerRun 514
+      
+      if tcp
+      $ModLoad imtcp
+      $InputTCPServerRun 514
+
+5. Testing Decoder, dengan cara melakuakan editing decoder 
+6. Silahkan masukan log dibawah ini 
+    Oct 19 16:12:30 f5-bigip ASM: Attack detected: SQL Injection, Source IP: 192.168.1.5, URI: /login.php
+7. decoder respon nya dengan hal yang tidak kita inginkan, maka dari itu kita coba edit decoder f5
+   - sudo nano /var/ossec/ruleset/decoders/0525-f5_bigip_decoders.xml 
+   - tambahkan configurasi ini dibawah dari semua defaul decoder 
+
+      <decoder name="f5-bigip-cef-general-fields">
+        <parent>f5-bigip-cef</parent>
+        <regex>severity="(\w+)"</regex>
+        <order>severity</order>
+      </decoder>
+      
+      <decoder name="f5-bigip-cef-general-fields">
+        <parent>f5-bigip-cef</parent>
+        <regex>^Attack detected: (\.+), Source IP: (\d+.\d+.\d+.\d+), URI: /(\.+)</re>
+        <order>attack,srcip,uri</order>
+      </decoder>
+
+8. selesai
+
+==============================================================================================
+==============================================================================================
+
+
+
+==============================================================================================
+Lab 3 - Brute Force
+==============================================================================================
+
+1. Masuk ke Menu Threat intelligence, dan klik threat hunting
+2. Klik event terbaru, dan analisa
+3. selesai
+
+==============================================================================================
+==============================================================================================
+
+
+
+==============================================================================================
+Lab 4 - Update Ruleset
+==============================================================================================
+
+1. Backup ruleset default 
+  - sudo cp -r /var/ossec/rules/ /var/ossec/rules_backup/
+
+2. Clone Repo Github
+  - cd /tmp
+  - git clone https://github.com/wazuh/wazuh-ruleset.git
+
+3. Replace semua ruleset 
+  -  sudo cp -r wazuh-ruleset/rules/* /var/ossec/rules/
+
+4. lakukan pengeditan ruleset di wazuh server
+  - sudo nano /var/ossec/etc/rules/local_rules.xml 
+
+        <group name="authentication_failed, brute_force,">
+          <rule id="100001" level="10">
+            <decoded_as>syslog</decoded_as>
+            <description>Multiple failed login attempts detected</description>
+            <group>authentication_failed</group>
+            <frequency>5</frequency>
+            <timeframe>60</timeframe>
+            <condition field="syslog_program" match="sshd"/>
+            <match>authentication failure</match>
+          </rule>
+        </group>
+
+5. Testing 
+   tail -f /var/ossec/logs/alerts/alerts.log | grep "100001"
+
+==============================================================================================
+==============================================================================================
+
+
+
+==============================================================================================
+Lab 4 - Update Ruleset
+==============================================================================================
+
+1. Backup ruleset default 
+  - sudo cp -r /var/ossec/rules/ /var/ossec/rules_backup/
+
+2. Clone Repo Github
+  - cd /tmp
+  - git clone https://github.com/wazuh/wazuh-ruleset.git
+
+3. Replace semua ruleset 
+  -  sudo cp -r wazuh-ruleset/rules/* /var/ossec/rules/
+
+4. lakukan pengeditan ruleset di wazuh server
+  - sudo nano /var/ossec/etc/rules/local_rules.xml 
+
+        <group name="authentication_failed, brute_force,">
+          <rule id="100001" level="10">
+            <decoded_as>syslog</decoded_as>
+            <description>Multiple failed login attempts detected</description>
+            <group>authentication_failed</group>
+            <frequency>5</frequency>
+            <timeframe>60</timeframe>
+            <condition field="syslog_program" match="sshd"/>
+            <match>authentication failure</match>
+          </rule>
+        </group>
+
+5. Testing 
+   tail -f /var/ossec/logs/alerts/alerts.log | grep "100001"
+6. Selesai
+
+==============================================================================================
+==============================================================================================
+
+
+==============================================================================================
+Lab 4 - Update Ruleset
+==============================================================================================
+
+1. Backup ruleset default 
+  - sudo cp -r /var/ossec/rules/ /var/ossec/rules_backup/
+
+2. Clone Repo Github
+  - cd /tmp
+  - git clone https://github.com/wazuh/wazuh-ruleset.git
+
+3. Replace semua ruleset 
+  -  sudo cp -r wazuh-ruleset/rules/* /var/ossec/rules/
+
+4. lakukan pengeditan ruleset di wazuh server
+  - sudo nano /var/ossec/etc/rules/local_rules.xml 
+
+        <group name="authentication_failed, brute_force,">
+          <rule id="100001" level="10">
+            <decoded_as>syslog</decoded_as>
+            <description>Multiple failed login attempts detected</description>
+            <group>authentication_failed</group>
+            <frequency>5</frequency>
+            <timeframe>60</timeframe>
+            <condition field="syslog_program" match="sshd"/>
+            <match>authentication failure</match>
+          </rule>
+        </group>
+
+5. Testing 
+   tail -f /var/ossec/logs/alerts/alerts.log | grep "100001"
+6. Selesai
+
+==============================================================================================
+==============================================================================================
+
+==============================================================================================
+Lab 5 - Update Ruleset
+==============================================================================================
+
+1. tambahkan decoder baru di /var/ossec/ruleset/decoder/<name-file>
+   - sudo nano /var/ossec/ruleset/decoder/0786-suricata_decoder.xml
+    isikan ini : 
+
+      <decoder name="suricata_alert">
+        <program_name>^suricata$</program_name>
+      </decoder>
+      
+      <decoder name="suricata_ddos">
+        <parent>suricata_alert</parent>
+        <regex>.*event_type=\"alert\".*classification=\"DDoS Attack\".*src_ip=\"(\d+\.\d+\.\d+\.\d+)\".*dest_ip=\"(\d+\.\d+\.\d+\.\d+)\".*</regex>
+        <order>src_ip, dest_ip</order>
+      </decoder>
+      
+      <decoder name="suricata_c2">
+        <parent>suricata_alert</parent>
+        <regex>.*event_type=\"alert\".*classification=\"C2 Beacon\".*src_ip=\"(\d+\.\d+\.\d+\.\d+)\".*dest_ip=\"(\d+\.\d+\.\d+\.\d+)\".*</regex>
+        <order>src_ip, dest_ip</order>
+      </decoder>
+
+2. tambahkan ruleset baru di /var/ossec/ruleset/rules/<name-file>
+   - sudo nano /var/ossec/ruleset/rules/0786-suricata_attack_ruleset.xml 
+
+    <group name="suricata_attack_rules">
+      <rule id="100020" level="10">
+        <decoded_as>suricata_ddos</decoded_as>
+        <description>DDoS Attack Detected by Suricata</description>
+        <group>ddos, network, suricata</group>
+        <options>no_full_log</options>
+        <mitre>
+          <id>T1498</id>  <!-- Network Denial of Service -->
+          <technique>DDoS Attack</technique>
+        </mitre>
+      </rule>
+    
+      <rule id="100021" level="10">
+        <decoded_as>suricata_c2</decoded_as>
+        <description>C2 Beacon Detected by Suricata</description>
+        <group>c2, beacon, suricata</group>
+        <options>no_full_log</options>
+        <mitre>
+          <id>T1071</id>  <!-- Application Layer Protocol -->
+          <technique>Command and Control (Beacon)</technique>
+        </mitre>
+      </rule>
+    </group>
+
+3. testing di dashboard wazuh ruleset test
+    suricata 'event_type="alert" classification="DDoS Attack" src_ip="192.168.1.1" dest_ip="10.0.0.5"'
+    dan 
+    suricata 'event_type="alert" classification="C2 Beacon" src_ip="192.168.1.2" dest_ip="10.0.0.10"'
+
+4. testing dengan command : 
+    tail -f /var/ossec/logs/alerts/alerts.json
+
+5. selesai
+
+
+==============================================================================================
+==============================================================================================
+
+
+==============================================================================================
+Lab 6 - Usage CBD List
+==============================================================================================
+
+1. tambahkan decoder baru di /var/ossec/ruleset/decoder/<name-file>
+   - sudo nano /var/ossec/ruleset/decoder/0533-sshd_decoder.xml
+    isikan ini : 
+
+     <decoder name="sshd">
+      <program_name>^sshd$</program_name>
+    </decoder>
+    
+    <decoder name="sshd_failed_login">
+      <parent>sshd</parent>
+      <regex>.*Failed password for (invalid user )?(\w+) from (\d+\.\d+\.\d+\.\d+) port \d+ ssh2</regex>
+      <order>is_invalid_user, username, src_ip</order>
+    </decoder>
+
+
+2. tambahkan ruleset baru di /var/ossec/ruleset/rules/<name-file>
+   - sudo nano /var/ossec/ruleset/rules/0786-suricata_attack_ruleset.xml 
+
+<group name="sshd_lookup_rules">
+  <rule id="100060" level="5">
+    <decoded_as>sshd_failed_login</decoded_as>
+    <description>SSH failed login attempt detected</description>
+    <group>authentication, sshd</group>
+  </rule>
+
+  <rule id="100061" level="8">
+    <parent>100060</parent>
+    <description>Multiple failed SSH logins detected from same IP</description>
+    <group>authentication, sshd, brute-force</group>
+    <firedtimes>3</firedtimes>
+    <same_source_ip>yes</same_source_ip>
+    <lookup>
+      <name>ip_blacklist</name>
+      <match>src_ip</match>
+   </lookup>
+  </rule>
+
+  <rule id="100062" level="10">
+    <description>SSH login attempt from a known malicious IP</description>
+    <group>authentication, sshd, tracked-ip</group>
+    <lookup>
+      <name>ip_blacklist</name>
+      <match>src_ip</match>
+      <type>match</type>
+    </lookup>
+  </rule>
+</group>
+
+
+3. testing di dashboard wazuh ruleset test
+    ssshd 'Failed password for invalid user admin from 192.168.1.100 port 22 ssh2'
+
+4. testing dengan command : 
+    tail -f /var/ossec/logs/alerts/alerts.json
+
+5. selesai
+
+==============================================================================================
+==============================================================================================
