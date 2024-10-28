@@ -114,6 +114,9 @@ Lab 2 - Syslog Integration
     <location>/var/log/syslog</location>
   </localfile>
 
+systemctl restart rsyslog
+systemctl restart wazuh-agent
+
 4. cek log pada wazuh-server dengan cara tail -f /var/ossec/logs/ossec.log
 5. Testing Decoder, dengan cara melakuakan editing decoder 
 6. Silahkan masukan log dibawah ini 
@@ -265,7 +268,7 @@ Lab 4 - Update Ruleset
 ==============================================================================================
 
 ==============================================================================================
-Lab 5 - Update Ruleset
+Lab 5 - Suricata Agent
 ==============================================================================================
 
 1. tambahkan decoder baru di /var/ossec/ruleset/decoder/<name-file>
