@@ -186,8 +186,9 @@ Lab 4 - Update Ruleset
           </rule>
         </group>
 
-5. Testing 
-   tail -f /var/ossec/logs/alerts/alerts.log | grep "100001"
+5. Testing dengan mencoba beberapa kali gagal login ssh 
+   - ssh ubuntu@<ip-agent> ( 5x salah password atau lebih ) 
+   - tail -f /var/ossec/logs/alerts/alerts.log | grep "100001"
 6. Selesai
 
 ==============================================================================================
