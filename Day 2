@@ -188,84 +188,11 @@ Lab 4 - Update Ruleset
 
 5. Testing 
    tail -f /var/ossec/logs/alerts/alerts.log | grep "100001"
-
-==============================================================================================
-==============================================================================================
-
-
-
-==============================================================================================
-Lab 4 - Update Ruleset
-==============================================================================================
-
-1. Backup ruleset default 
-  - sudo cp -r /var/ossec/rules/ /var/ossec/rules_backup/
-
-2. Clone Repo Github
-  - cd /tmp
-  - git clone https://github.com/wazuh/wazuh-ruleset.git
-
-3. Replace semua ruleset 
-  -  sudo cp -r wazuh-ruleset/rules/* /var/ossec/rules/
-
-4. lakukan pengeditan ruleset di wazuh server
-  - sudo nano /var/ossec/etc/rules/local_rules.xml 
-
-        <group name="authentication_failed, brute_force,">
-          <rule id="100001" level="10">
-            <decoded_as>syslog</decoded_as>
-            <description>Multiple failed login attempts detected</description>
-            <group>authentication_failed</group>
-            <frequency>5</frequency>
-            <timeframe>60</timeframe>
-            <condition field="syslog_program" match="sshd"/>
-            <match>authentication failure</match>
-          </rule>
-        </group>
-
-5. Testing 
-   tail -f /var/ossec/logs/alerts/alerts.log | grep "100001"
 6. Selesai
 
 ==============================================================================================
 ==============================================================================================
 
-
-==============================================================================================
-Lab 4 - Update Ruleset
-==============================================================================================
-
-1. Backup ruleset default 
-  - sudo cp -r /var/ossec/rules/ /var/ossec/rules_backup/
-
-2. Clone Repo Github
-  - cd /tmp
-  - git clone https://github.com/wazuh/wazuh-ruleset.git
-
-3. Replace semua ruleset 
-  -  sudo cp -r wazuh-ruleset/rules/* /var/ossec/rules/
-
-4. lakukan pengeditan ruleset di wazuh server
-  - sudo nano /var/ossec/etc/rules/local_rules.xml 
-
-        <group name="authentication_failed, brute_force,">
-          <rule id="100001" level="10">
-            <decoded_as>syslog</decoded_as>
-            <description>Multiple failed login attempts detected</description>
-            <group>authentication_failed</group>
-            <frequency>5</frequency>
-            <timeframe>60</timeframe>
-            <condition field="syslog_program" match="sshd"/>
-            <match>authentication failure</match>
-          </rule>
-        </group>
-
-5. Testing 
-   tail -f /var/ossec/logs/alerts/alerts.log | grep "100001"
-6. Selesai
-
-==============================================================================================
-==============================================================================================
 
 ==============================================================================================
 Lab 5 - Suricata Agent
