@@ -145,7 +145,7 @@ Lab 6 - Lab Configuring Central
                   <group name="HQ-SRV">
                     <syscheck>
                       <frequency>3600</frequency>
-                      <directories check_all="yes">/PATH/TO/FIM</directories>
+                      <directories check_all="yes">/home/ubuntu/</directories>
                     </syscheck>
                   </group>
             </agent_config>
