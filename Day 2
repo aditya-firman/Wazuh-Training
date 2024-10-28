@@ -314,7 +314,7 @@ Lab 6 - Usage CBD List
 
 
 3. testing di dashboard wazuh ruleset test
-    ssshd 'Failed password for invalid user admin from 192.168.1.100 port 22 ssh2'
+    sshd 'Failed password for invalid user admin from 192.168.1.100 port 22 ssh2'
 
 4. testing dengan command : 
     tail -f /var/ossec/logs/alerts/alerts.json
