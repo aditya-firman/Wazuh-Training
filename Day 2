@@ -92,30 +92,29 @@ Lab 2 - Syslog Integration
 ==============================================================================================
 
 1. Configurasi Mikrotik untuk melempar Log pada agent-ubuntu 
+   - Masuk melalui winbox ke mikrotik
+   - masuk ke menu system -> logging masuk ke menu action selanjutnya tambahkan
+   - type : remote
+   - ubah remote-address ke ip ubuntu-desktop
+   - klik oke, selanjutnya ubah semua log ke arah action1
+      
 2. pada agent ubuntu lakukan configurasi ini
-   - ossec.conf
+   - /etc/rsyslog.conf
 
-   <syslog_output>
-      <server>
-          <address>YOUR_SYSLOG_SERVER_IP</address>   <!-- Syslog server IP or hostname -->
-          <port>514</port>                           <!-- Default Syslog port (UDP 514) -->
-          <protocol>udp</protocol>                   <!-- Syslog protocol: udp, tcp, or tls -->
-          <format>default</format>                   <!-- Syslog format: default or cef (Common Event Format) -->
-          <queue_size>5000</queue_size>              <!-- Maximum number of messages in the queue -->
-          <frequency>10</frequency>                  <!-- Frequency of sending log data in seconds -->
-      </server>
-  </syslog_output>
-
-3. Edit /etc/rsyslog.conf
-
-      if udp 
+      #Provides UDP syslog reception
       $ModLoad imudp
       $UDPServerRun 514
-      
-      if tcp
-      $ModLoad imtcp
-      $InputTCPServerRun 514
 
+   - selanjunya testing apa sudah masuk log mikrotik ke ubuntu dengan tail -f /var/log/syslog
+
+3. lakukan perubahah pada ossec.conf disisi agent ( ubuntu-desktop ) 
+
+  <localfile>
+    <log_format>syslog</log_format>
+    <location>/var/log/syslog</location>
+  </localfile>
+
+4. cek log pada wazuh-server dengan cara tail -f /var/ossec/logs/ossec.log
 5. Testing Decoder, dengan cara melakuakan editing decoder 
 6. Silahkan masukan log dibawah ini 
     Oct 19 16:12:30 f5-bigip ASM: Attack detected: SQL Injection, Source IP: 192.168.1.5, URI: /login.php
