@@ -18,7 +18,7 @@ Practical Example :
             <order>type,srcuser,action,dstuser</order>
           </decoder>
      - systemctl restart wazuh-manager
-3. Testing Kembali Menggunakan Ruleset Test, Hasilnya akan gagal 
+3. Testing Kembali Menggunakan Ruleset Test, Hasilnya akan berhasil
 4. Lakukan Yang Siblings Decoder, dengan hapus configurasi diatas dan tambahkan configurasi dibawah ini 
     
 <decoder name="securityapp">
