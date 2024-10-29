@@ -9,7 +9,7 @@ Lab 1 - Set Up Comprehensive File Integrity Monitoring (FIM) on a Wazuh Agent
 <syscheck>
     <!-- Monitor critical system directories -->
     <directories realtime="yes" whodata="yes" report_changes="yes">/etc</directories>
-    <directories realtime="yes" whodata="yes" report_changes="yes">/var/www/html</directories>
+    <directories realtime="yes" whodata="yes" report_changes="yes">/home/ubuntu</directories>
 
     <!-- Exclude log and temp files from monitoring -->
     <ignore>/var/log/*</ignore>
