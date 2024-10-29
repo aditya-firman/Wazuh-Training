@@ -211,13 +211,13 @@ Lab 5 - Suricata Agent
       
       <decoder name="suricata_ddos">
         <parent>suricata_alert</parent>
-        <regex>.*event_type=\"alert\".*classification=\"DDoS Attack\".*src_ip=\"(\d+\.\d+\.\d+\.\d+)\".*dest_ip=\"(\d+\.\d+\.\d+\.\d+)\".*</regex>
+        <regex>.*event_type="alert".*classification="DDoS Attack".*src_ip="(\d+\.\d+\.\d+\.\d+)".*dest_ip="(\d+\.\d+\.\d+\.\d+)".*</regex>
         <order>src_ip, dest_ip</order>
       </decoder>
       
       <decoder name="suricata_c2">
         <parent>suricata_alert</parent>
-        <regex>.*event_type=\"alert\".*classification=\"C2 Beacon\".*src_ip=\"(\d+\.\d+\.\d+\.\d+)\".*dest_ip=\"(\d+\.\d+\.\d+\.\d+)\".*</regex>
+        <regex>.*event_type="alert".*classification="C2 Beacon".*src_ip="(\d+\.\d+\.\d+\.\d+)".*dest_ip="(\d+\.\d+\.\d+\.\d+)".*</regex>
         <order>src_ip, dest_ip</order>
       </decoder>
 
