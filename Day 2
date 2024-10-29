@@ -263,7 +263,7 @@ Lab 6 - Usage CBD List
     - 192.168.100.1 
 
 2. tambahkan decoder baru di /var/ossec/ruleset/decoder/<name-file>
-   - sudo nano /var/ossec/ruleset/decoder/0533-sshd_decoder.xml
+   - sudo nano /var/ossec/ruleset/decoder/0310-ssh_decoders.xml
     isikan ini : 
 
      <decoder name="sshd">
