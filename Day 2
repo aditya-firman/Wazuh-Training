@@ -258,7 +258,11 @@ Lab 5 - Suricata Agent
 Lab 6 - Usage CBD List
 ==============================================================================================
 
-1. tambahkan decoder baru di /var/ossec/ruleset/decoder/<name-file>
+1. sudo nano /var/ossec/etc/lists/ip_blacklist
+    - 192.168.10.1
+    - 192.168.100.1 
+
+2. tambahkan decoder baru di /var/ossec/ruleset/decoder/<name-file>
    - sudo nano /var/ossec/ruleset/decoder/0533-sshd_decoder.xml
     isikan ini : 
 
@@ -273,7 +277,7 @@ Lab 6 - Usage CBD List
     </decoder>
 
 
-2. tambahkan ruleset baru di /var/ossec/ruleset/rules/<name-file>
+3. tambahkan ruleset baru di /var/ossec/ruleset/rules/<name-file>
    - sudo nano /var/ossec/ruleset/rules/0095-sshd_rules.xml 
 
 <group name="sshd_lookup_rules">
@@ -307,13 +311,13 @@ Lab 6 - Usage CBD List
 </group>
 
 
-3. testing di dashboard wazuh ruleset test
+4. testing di dashboard wazuh ruleset test
     sshd 'Failed password for invalid user admin from 192.168.1.100 port 22 ssh2'
 
-4. testing dengan command : 
+5. testing dengan command : 
     tail -f /var/ossec/logs/alerts/alerts.json
 
-5. selesai
+6. selesai
 
 ==============================================================================================
 ==============================================================================================
