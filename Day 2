@@ -274,7 +274,7 @@ Lab 6 - Usage CBD List
 
 
 2. tambahkan ruleset baru di /var/ossec/ruleset/rules/<name-file>
-   - sudo nano /var/ossec/ruleset/rules/0786-suricata_attack_ruleset.xml 
+   - sudo nano /var/ossec/ruleset/rules/0095-sshd_rules.xml 
 
 <group name="sshd_lookup_rules">
   <rule id="100060" level="5">
