@@ -163,7 +163,7 @@ Lab 4 - Update Ruleset
 ==============================================================================================
 
 1. Backup ruleset default 
-  - sudo cp -r /var/ossec/rules/ /var/ossec/rules_backup/
+  - sudo cp -r /var/ossec/ruleset/rules/* /var/ossec/rules_backup/
 
 2. Clone Repo Github
   - cd /tmp
