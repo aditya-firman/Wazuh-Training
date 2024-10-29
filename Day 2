@@ -230,10 +230,6 @@ Lab 5 - Suricata Agent
         <description>DDoS Attack Detected by Suricata</description>
         <group>ddos, network, suricata</group>
         <options>no_full_log</options>
-        <mitre>
-          <id>T1498</id>  <!-- Network Denial of Service -->
-          <technique>DDoS Attack</technique>
-        </mitre>
       </rule>
     
       <rule id="100021" level="10">
@@ -241,11 +237,6 @@ Lab 5 - Suricata Agent
         <description>C2 Beacon Detected by Suricata</description>
         <group>c2, beacon, suricata</group>
         <options>no_full_log</options>
-        <mitre>
-          <id>T1071</id>  <!-- Application Layer Protocol -->
-          <technique>Command and Control</technique>
-        </mitre>
-      </rule>
     </group>
 
 3. testing di dashboard wazuh ruleset test
