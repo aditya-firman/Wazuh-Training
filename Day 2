@@ -99,8 +99,9 @@ Lab 2 - Syslog Integration
    - klik oke, selanjutnya ubah semua log ke arah action1
       
 2. pada agent ubuntu lakukan configurasi ini
-   - /etc/rsyslog.conf
+   - nano /etc/rsyslog.conf
 
+   - Cari configurasi seperti dibawah, ( defaultnya itu di gunakan tanda pagar (#), take out (#) 
       #Provides UDP syslog reception
       $ModLoad imudp
       $UDPServerRun 514
