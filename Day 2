@@ -169,7 +169,7 @@ Lab 4 - Update Ruleset
   - cd /tmp
   - git clone https://github.com/wazuh/wazuh-ruleset.git
 
-3. Replace semua ruleset 
+3. Replace semua ruleset, masih dalam /tmp
   -  sudo cp -r wazuh-ruleset/rules/* /var/ossec/rules/
 
 4. lakukan pengeditan ruleset di wazuh server
