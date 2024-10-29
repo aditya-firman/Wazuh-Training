@@ -102,9 +102,9 @@ Lab 2 - Syslog Integration
    - nano /etc/rsyslog.conf
 
    - Cari configurasi seperti dibawah, ( defaultnya itu di gunakan tanda pagar (#), take out (#) 
-      #Provides UDP syslog reception
-      $ModLoad imudp
-      $UDPServerRun 514
+      # provides UDP syslog reception
+      module(load="imudp")
+      input(type="imudp" port="514")
 
    - selanjunya testing apa sudah masuk log mikrotik ke ubuntu dengan tail -f /var/log/syslog
 
