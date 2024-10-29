@@ -243,7 +243,7 @@ Lab 5 - Suricata Agent
         <options>no_full_log</options>
         <mitre>
           <id>T1071</id>  <!-- Application Layer Protocol -->
-          <technique>Command and Control (Beacon)</technique>
+          <technique>Command and Control</technique>
         </mitre>
       </rule>
     </group>
