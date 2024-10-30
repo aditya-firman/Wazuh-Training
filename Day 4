@@ -127,12 +127,12 @@ Lab 3 - sysmon Integration
 
 1. donwload sysmon pada windows agent di website ini https://technet.microsoft.com/en-us/sysinternals/sysmon
 
-2. donwload file configuration xml untuk mendeteksi kegiatan powershell https://wazuh.com/resources/sysconfig.xml.zip
+2. donwload file configuration xml untuk mendeteksi kegiatan powershell https://drive.google.com/drive/folders/1UASY2FrelFHMaNIk8d4FqtOUCM8xye9c?usp=sharing
 
 3. masukan file tersebut kedalam folder sysmon
 
 4. setelah itu install file tersebut menggunakan sysmon 
-  - Sysmon64.exe -accepteula -i sysconfig.xml
+  - Sysmon64.exe -i sysconfig.xml
 
 5. configurasi pada ossec.conf windows, dibawah semua configurasi
 
@@ -206,61 +206,7 @@ systemctl restart wazuh-manager
  "location": "WinEvtLog"
 }
 
-<!--
-  sysmon-config | Updated for Sysmon 4.90
-
-  Created by Wazuh, Inc. <support@wazuh.com>.
-  This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2.
--->
-
-<Sysmon schemaversion="4.90">
-	<HashAlgorithms>md5,sha256</HashAlgorithms>
-	<EventFiltering>
-	<!--SYSMON EVENT ID 1 : PROCESS CREATION-->
-		<ProcessCreate onmatch="include">
-				<Image condition="contains">powershell.exe</Image>
-		</ProcessCreate>
-
-	<!--SYSMON EVENT ID 2 : FILE CREATION TIME CHANGED-->
-		<FileCreateTime onmatch="include"></FileCreateTime>
-		
-	<!--SYSMON EVENT ID 3 : NETWORK CONNECTION INITIATED-->		
-		<NetworkConnect onmatch="include"></NetworkConnect>
-		
-	<!--SYSMON EVENT ID 5 : PROCESS TERMINATION-->
-		<ProcessTerminate onmatch="include"></ProcessTerminate>
-		
-	<!--SYSMON EVENT ID 6 : DRIVER LOAD-->
-		<DriverLoad onmatch="include"></DriverLoad>		
-		
-	<!--SYSMON EVENT ID 7 : IMAGE LOAD-->		
-		<ImageLoad onmatch="include"></ImageLoad>
-		
-	<!--SYSMON EVENT ID 8 : CREATE REMOTE THREAD-->		
-		<CreateRemoteThread onmatch="include"></CreateRemoteThread>
-		
-	<!--SYSMON EVENT ID 9 : RAW DISK ACCESS READ-->
-		<RawAccessRead onmatch="include"></RawAccessRead>		
-	
-	<!--SYSMON EVENT ID 10 : INTER-PROCESS ACCESS-->
-		<ProcessAccess onmatch="include"></ProcessAccess>
-		
-	<!--SYSMON EVENT ID 11 : FILE CREATE-->
-		<FileCreate onmatch="include"></FileCreate>
-	
-	<!--SYSMON EVENT ID 12, 13, 14 : REGISTRY MODIFICATION-->
-		<RegistryEvent onmatch="include"></RegistryEvent>
-
-	<!--SYSMON EVENT ID 15 : FILE STREAM HASH-->
-		<FileCreateStreamHash onmatch="include"></FileCreateStreamHash>	
-		
-	<!--SYSMON EVENT ID 17 : NAMED PIPE EVENT-->
-		<PipeEvent onmatch="include"></PipeEvent>
-
-	</EventFiltering>
-</Sysmon>
-
-
+9. selesai
    
 
 
