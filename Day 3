@@ -88,7 +88,9 @@ Lab 3 - FIM Detecting Malware
   - echo "!#/bin/python3" | sudo tee /bin/ps > /dev/null
   - sudo chmod +x /bin/ps
 
-3. Verifikasi 
+3. atau pakai sample malware eicar wget https://www.eicar.org/download/eicar_com-zip/?wpdmdl=8847&refresh=6721cb5deaec81730267997 
+
+4. Verifikasi 
   - tail -f /var/ossec/logs/alerts/alerts.json
 
 5. check kembali di dashboard file integrity monitoring 
