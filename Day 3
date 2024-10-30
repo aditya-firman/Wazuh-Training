@@ -122,7 +122,7 @@ Lab 4 - Automatic Firewall Blocking SSH Brute Force
 Lab 5 - Custom SCA
 ==============================================================================================
 
-1. buatlah file yang menyerupa user & password 
+1. buatlah file yang menyerupa user & password ( ubuntu endpoint )
    - echo -e "config_file\nsecond line of configuration\npassword_enabled: yes" > /usr/share/testfile.txt
 
 2. buatlah directory sca custom 
