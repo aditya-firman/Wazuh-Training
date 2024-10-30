@@ -85,7 +85,7 @@ Lab 3 - FIM Detecting Malware
 2. Buatkan file yang diangap rootkit dengan mode user 
   - touch /tmp/.hidden_malware
   - sudo mv /bin/ps /bin/ps.bak
-  - echo ""\#!/bin/python3"" | sudo tee /bin/ps > /dev/null
+  - echo "#/!/bin/python3" | sudo tee /bin/ps > /dev/null
   - sudo chmod +x /bin/ps
 
 3. atau pakai sample malware eicar wget https://www.eicar.org/download/eicar_com-zip/?wpdmdl=8847&refresh=6721cb5deaec81730267997 
