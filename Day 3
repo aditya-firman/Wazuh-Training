@@ -158,10 +158,16 @@ Lab 5 - Custom SCA
             - 'f:/usr/share/testfile.txt -> r:^password_enabled: yes$'
 
 4. ubah ownership dari file diatas
-   - chown wazuh:wazuh /var/ossec/etc/custom-sca-files/keyword.yml
+   - chown wazuh:wazuh /var/ossec/etc/custom-sca-files/keywordcheck.yml
 
 5. tambahkan configurasi di ossec.conf 
-   - <policy enabled="yes">/var/ossec/etc/custom-sca-files/keyword.yml</policy>
+   - tambahkan konfigurasi 
+
+    <sca>
+      <policies>
+        <policy enabled="yes">/var/ossec/etc/custom-sca-files/keywordcheck.yml</policy>
+      </policies>
+    </sca>
 
 6. restart wazuh-agent
    - systemctl restart wazuh-agent
