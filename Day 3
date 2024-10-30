@@ -103,7 +103,7 @@ Lab 3 - FIM Detecting Malware
 Lab 4 - Automatic Firewall Blocking SSH Brute Force
 ==============================================================================================
 
-1. edit ossec.conf ( wazuh server ) tambahkan configurasi dibawah ini : 
+1. edit ossec.conf ( agent ubuntu ) tambahkan configurasi dibawah ini : 
 
   <active-response>
     <command>firewall-drop</command> <!-- Script to block the IP -->
