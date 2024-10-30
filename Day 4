@@ -1,1 +1,266 @@
-Selamat Datang
+Selamat Datang !
+
+=========================================================
+Lab 1 - Docker Integration 
+=========================================================
+
+1. Di wazuh agent ubuntu 
+  - instaling python3 
+    sudo apt install python3 python3-pip
+    pip3 install --upgrade pip
+
+2. install docker 
+  - curl -sSL https://get.docker.com/ | sh
+    sudo pip3 install docker==7.1.0 urllib3==2.2.2 requests==2.32.2
+
+3. edit ossec.conf pada agent ubuntu, diantara wodle name="cis-cat" dan osquery 
+
+  <wodle name="docker-listener">
+    <interval>10m</interval>
+    <attempts>5</attempts>
+    <run_on_start>yes</run_on_start>
+    <disabled>no</disabled>
+  </wodle>
+
+4. test configuration 
+    sudo docker pull nginx
+    sudo docker run -d -P --name nginx_container nginx
+    sudo docker exec -it nginx_container cat /etc/passwd
+    sudo docker exec -it nginx_container /bin/bash
+    exit
+    
+    sudo docker stop nginx_container
+    sudo docker rm nginx_container
+
+5. check alert 
+   tail -f /var/ossec/logs/alerts/alerts.log
+
+6. selesai
+
+=========================================================
+Lab 2 - osquery Integration 
+=========================================================
+
+1. instaling osquery 
+  export OSQUERY_KEY=1484120AC4E9F8A1A577AEEE97A80C63C9D8B80B
+  apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $OSQUERY_KEY
+  add-apt-repository 'deb [arch=amd64] https://pkg.osquery.io/deb deb main'
+  apt-get update
+  apt-get install osquery
+
+2. buat file untuk integration osquery ke wazuh 
+  nano etc/osquery/osquery.conf
+  masukan configurasi ini : 
+
+  {
+    "options": {
+        "config_plugin": "filesystem",
+        "logger_plugin": "filesystem",
+        "utc": "true"
+    },
+
+    "schedule": {
+        "system_info": {
+        "query": "SELECT hostname, cpu_brand, physical_memory FROM system_info;",
+        "interval": 3600
+        },
+        "high_load_average": {
+        "query": "SELECT period, average, '70%' AS 'threshold' FROM load_average WHERE period = '15m' AND average > '0.7';",
+        "interval": 900,
+        "description": "Report if load charge is over 70 percent."
+        },
+        "low_free_memory": {
+        "query": "SELECT memory_total, memory_free, CAST(memory_free AS real) / memory_total AS memory_free_perc, '10%' AS threshold FROM memory_info WHERE memory_free_perc < 0.1;",
+        "interval": 1800,
+        "description": "Free RAM is under 10%."
+        }
+    },
+
+    "packs": {
+        "osquery-monitoring": "/opt/osquery/share/osquery/packs/osquery-monitoring.conf",
+        "incident-response": "/opt/osquery/share/osquery/packs/incident-response.conf",
+        "it-compliance": "/opt/osquery/share/osquery/packs/it-compliance.conf",
+        "vuln-management": "/opt/osquery/share/osquery/packs/vuln-management.conf",
+        "hardware-monitoring": "/opt/osquery/share/osquery/packs/hardware-monitoring.conf",
+        "ossec-rootkit": "/opt/osquery/share/osquery/packs/ossec-rootkit.conf"
+    }
+}
+
+systemctl enable osqueryd
+systemctl start osqueryd
+
+3. checking alert di wazuh server
+  tail -f /var/ossec/logs/alerts/alerts.log
+
+akan ada muncul alert seperti ini 
+
+* Alert 1532958886.437707: - osquery,
+    2018 Jul 30 13:54:46 manager->osquery
+    Rule: 24010 (level 3) -> 'osquery data grouped'
+    {"name":"system_info","hostIdentifier":"manager","calendarTime":"Mon Jul 30 13:54:45 2018 UTC","unixTime":1532958885,"epoch":0,"counter":461,"columns":{"cgroup_namespace":"4026531835","cmdline":"","cwd":"/","disk_bytes_read":"0","disk_bytes_written":"0","egid":"0","euid":"0","gid":"0","ipc_namespace":"4026531839","mnt_namespace":"4026531840","name":"migration/0","net_namespace":"4026531957","nice":"0","on_disk":"-1","parent":"2","path":"","pgroup":"0","pid":"9","pid_namespace":"4026531836","resident_size":"","root":"/","sgid":"0","start_time":"0","state":"S","suid":"0","system_time":"2","threads":"1","total_size":"","uid":"0","user_namespace":"4026531837","user_time":"0","uts_namespace":"4026531838","wired_size":"0"},"action":"added"}
+    name: system_info
+    hostIdentifier: manager
+    calendarTime: Mon Jul 30 13:54:45 2018 UTC
+    unixTime: 1532958885
+    epoch: 0
+    counter: 461
+    columns.cgroup_namespace: 4026531835
+    columns.cmdline:
+    columns.cwd: /
+    columns.disk_bytes_read: 0
+    columns.disk_bytes_written: 0
+    columns.egid: 0
+    columns.euid: 0
+    columns.gid: 0
+    columns.ipc_namespace: 4026531839
+    columns.mnt_namespace: 4026531840
+    columns.name: migration/0
+    columns.net_namespace: 4026531957
+    columns.nice: 0
+
+4. selesai 
+
+
+=========================================================
+Lab 3 - sysmon Integration 
+=========================================================
+
+1. donwload sysmon pada windows agent di website ini https://technet.microsoft.com/en-us/sysinternals/sysmon
+
+2. donwload file configuration xml untuk mendeteksi kegiatan powershell https://wazuh.com/resources/sysconfig.xml.zip
+
+3. masukan file tersebut kedalam folder sysmon
+
+4. setelah itu install file tersebut menggunakan sysmon 
+  - Sysmon64.exe -accepteula -i sysconfig.xml
+
+5. configurasi pada ossec.conf windows, dibawah semua configurasi
+
+<localfile>
+<location>Microsoft-Windows-Sysmon/Operational</location>
+<log_format>eventchannel</log_format>
+</localfile>
+
+6. selanjutnya configurasi wazuh manager di local_ruleset.xml, tambahkan konfigurasi ini 
+
+<group name="sysmon,">
+ <rule id="255000" level="12">
+ <if_group>sysmon_event1</if_group>
+ <field name="sysmon.image">\\powershell.exe||\\.ps1||\\.ps2</field>
+ <description>Sysmon - Event 1: Bad exe: $(sysmon.image)</description>
+ <group>sysmon_event1,powershell_execution,</group>
+ </rule>
+</group>
+
+systemctl restart wazuh-manager
+
+7. verifikasi 
+  tail -f /var/ossec/logs/alerts/alerts.log
+
+8. akan ada alert seperti ini 
+
+{
+ "timestamp": "2017-03-24T00:56:21+0000",
+ "rule": {
+ "level": 12,
+ "description": "Sysmon - Event 1: Bad exe: C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+ "id": "255000",
+ "firedtimes": 9,
+ "groups": [
+ "sysmon",
+ "sysmon_event1",
+ "powershell_execution"
+ ]
+ },
+ "agent": {
+ "id": "004",
+ "name": "Windows_1",
+ "ip": "172.31.21.211"
+ },
+ "manager": {
+ "name": "managername"
+ },
+ "srcuser": "WIN-VIHPK3T86T7\\Albert2",
+ "full_log": "2017 May 25 16:54:20 WinEvtLog: Microsoft-Windows-Sysmon/Operational: INFORMATION(1): Microsoft-Windows-Sysmon: SYSTEM: NT AUTHORITY: WIN-VIHPK3T86T7: Process Create: UtcTime: 2017-05-25 16:54:20.652 ProcessGuid: {9ADBFDD8-0C3C-5967-0300-20108FC61600} ProcessId: 16s4 Image: C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe CommandLine: \"C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\powershell.exe\" CurrentDirectory: C:\\Users\\Administrator\\ User: WIN-VIHPK3T86T7\\Administrator LogonGuid: {9ADBFDD8-0C3C-5967-0300-20108FC61600} LogonId: 0x1403ea TerminalSessionId: 3 IntegrityLevel: High Hashes: MD5=F6C714F1020F9BBF6A8534AC8AD7662F ParentProcessGuid: {9ADAFDC8-0B2A-5927-0000-00106F1E1400} ParentProcessId: 788 ParentImage: C:\\Windows\\explorer.exe ParentCommandLine: C:\\Windows\\Explorer.EXE",
+ "program_name": "WinEvtLog",
+ "id": "1",
+ "sysmon": {
+ "processGuid": "{9ADBFDD8-0C3C-5967-0300-20108FC61600}",
+ "processId": "1676",
+ "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+ "commandLine": "\"C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\powershell.exe\"",
+ "currentDirectory": "C:\\Users\\Administrator\\",
+ "logonGuid": "{9ADBFDD8-0C3C-5967-0300-20108FC61600}",
+ "logonId": "0x1413ca",
+ "terminalSessionId": "3",
+ "integrityLevel": "High",
+ "hashes": "F6C714F1020F9BBF6A8534AC8AD7662F",
+ "parentProcessGuid": "{9ADAFDC8-0B2A-5927-0000-00106F1E1400}",
+ "parentProcessId": "788",
+ "parentImage": "C:\\Windows\\explorer.exe"
+ },
+ "decoder": {
+ "parent": "windows",
+ "name": "windows"
+ },
+ "location": "WinEvtLog"
+}
+
+<!--
+  sysmon-config | Updated for Sysmon 4.90
+
+  Created by Wazuh, Inc. <support@wazuh.com>.
+  This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2.
+-->
+
+<Sysmon schemaversion="4.90">
+	<HashAlgorithms>md5,sha256</HashAlgorithms>
+	<EventFiltering>
+	<!--SYSMON EVENT ID 1 : PROCESS CREATION-->
+		<ProcessCreate onmatch="include">
+				<Image condition="contains">powershell.exe</Image>
+		</ProcessCreate>
+
+	<!--SYSMON EVENT ID 2 : FILE CREATION TIME CHANGED-->
+		<FileCreateTime onmatch="include"></FileCreateTime>
+		
+	<!--SYSMON EVENT ID 3 : NETWORK CONNECTION INITIATED-->		
+		<NetworkConnect onmatch="include"></NetworkConnect>
+		
+	<!--SYSMON EVENT ID 5 : PROCESS TERMINATION-->
+		<ProcessTerminate onmatch="include"></ProcessTerminate>
+		
+	<!--SYSMON EVENT ID 6 : DRIVER LOAD-->
+		<DriverLoad onmatch="include"></DriverLoad>		
+		
+	<!--SYSMON EVENT ID 7 : IMAGE LOAD-->		
+		<ImageLoad onmatch="include"></ImageLoad>
+		
+	<!--SYSMON EVENT ID 8 : CREATE REMOTE THREAD-->		
+		<CreateRemoteThread onmatch="include"></CreateRemoteThread>
+		
+	<!--SYSMON EVENT ID 9 : RAW DISK ACCESS READ-->
+		<RawAccessRead onmatch="include"></RawAccessRead>		
+	
+	<!--SYSMON EVENT ID 10 : INTER-PROCESS ACCESS-->
+		<ProcessAccess onmatch="include"></ProcessAccess>
+		
+	<!--SYSMON EVENT ID 11 : FILE CREATE-->
+		<FileCreate onmatch="include"></FileCreate>
+	
+	<!--SYSMON EVENT ID 12, 13, 14 : REGISTRY MODIFICATION-->
+		<RegistryEvent onmatch="include"></RegistryEvent>
+
+	<!--SYSMON EVENT ID 15 : FILE STREAM HASH-->
+		<FileCreateStreamHash onmatch="include"></FileCreateStreamHash>	
+		
+	<!--SYSMON EVENT ID 17 : NAMED PIPE EVENT-->
+		<PipeEvent onmatch="include"></PipeEvent>
+
+	</EventFiltering>
+</Sysmon>
+
+
+   
+
+
