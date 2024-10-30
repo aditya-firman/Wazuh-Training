@@ -65,10 +65,9 @@ Lab 3 - FIM Detecting Malware
 1. edit ossec.conf ( agent ubuntu ) tambahkan configurasi dibawah ini : 
 
 <rootcheck>
-  <enabled>yes</enabled>
   <rootkit_files>yes</rootkit_files> <!-- Scan for rootkit IoCs -->
   <rootkit_trojans>yes</rootkit_trojans> <!-- Detect known trojans -->
-    <check_rk>yes</check_rk> <!-- Enable kernel check -->
+  <check_rk>yes</check_rk> <!-- Enable kernel check -->
   <frequency>3600</frequency> <!-- Scan every hour -->
 </rootcheck>
 
