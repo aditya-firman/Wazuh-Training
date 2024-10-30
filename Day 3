@@ -125,11 +125,8 @@ Lab 5 - Custom SCA
 1. buatlah file yang menyerupa user & password ( ubuntu endpoint )
    - echo -e "config_file\nsecond line of configuration\npassword_enabled: yes" > /usr/share/testfile.txt
 
-2. buatlah directory sca custom 
-  - mkdir /var/ossec/etc/custom-sca-files/
-
-3. buatla SCA Policy dengan nama custom-sca-files 
-   - sudo nano /var/ossec/etc/custom-sca-files/keywordcheck.yml
+3. buatla SCA Policy 
+   - sudo nano /var/ossec/ruleset/sca/keywordcheck.yml
 
       policy:
         id: "keyword_check"
@@ -158,19 +155,19 @@ Lab 5 - Custom SCA
             - 'f:/usr/share/testfile.txt -> r:^password_enabled: yes$'
 
 4. ubah ownership dari file diatas
-   - chown wazuh:wazuh /var/ossec/etc/custom-sca-files/keywordcheck.yml
+   - chown wazuh:wazuh /var/ossec/ruleset/sca/keywordcheck.yml
 
 5. tambahkan configurasi di ossec.conf 
    - tambahkan konfigurasi 
 
     <sca>
       <policies>
-        <policy enabled="yes">/var/ossec/etc/custom-sca-files/keywordcheck.yml</policy>
+        <policy enabled="yes">/var/ossec/ruleset/sca/keywordcheck.yml</policy>
       </policies>
     </sca>
 
 6. restart wazuh-agent
-   - systemctl restart wazuh-agent
+   - systemctl restart wazuh-agent dan wazuh manager 
 
 
 ==============================================================================================
