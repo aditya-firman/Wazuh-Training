@@ -117,7 +117,7 @@ Lab 3 - sysmon Integration
 <log_format>eventchannel</log_format>
 </localfile>
 
-6. selanjutnya configurasi wazuh manager di local_ruleset.xml, tambahkan konfigurasi ini 
+6. selanjutnya configurasi wazuh manager di nano /var/ossec/etc/rules/local_rules.xml, tambahkan konfigurasi ini 
 
 <group name="sysmon,">
  <rule id="255000" level="12">
