@@ -89,7 +89,18 @@ Lab 2 - osquery Integration
 systemctl enable osqueryd
 systemctl start osqueryd
 
-3. checking alert di wazuh server
+3. ubah konfigurasi osquery di ossec.conf dari disable= yes menjad disable=no
+
+  <wodle name="osquery">
+    <disabled>yes</disabled> --> yang diubah 
+    <run_daemon>yes</run_daemon>
+    <log_path>/var/log/osquery/osqueryd.results.log</log_path>
+    <config_path>/etc/osquery/osquery.conf</config_path>
+    <add_labels>yes</add_labels>
+  </wodle>
+
+
+4. checking alert di wazuh server
   tail -f /var/ossec/logs/alerts/alerts.log
 
 akan ada muncul alert seperti ini 
