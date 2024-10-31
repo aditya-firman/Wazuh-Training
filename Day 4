@@ -52,7 +52,6 @@ Lab 2 - osquery Integration
   nano etc/osquery/osquery.conf
   masukan configurasi ini : 
 
-{
 
   {
     "options": {
